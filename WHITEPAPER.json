@@ -1,0 +1,337 @@
+{
+  "spec": "infrapulse-whitepaper/1",
+  "service": {
+    "name": "InfraPulse",
+    "canonical_domain": "infrapulse.ai",
+    "base_url": "https://infrapulse.ai",
+    "status": "production",
+    "version": "1.0.0",
+    "last_updated_utc": "2026-02-18T00:00:00Z"
+  },
+  "summary": {
+    "one_liner": "Deterministic verification, escrow signaling, and coordination layer for autonomous AI commerce.",
+    "problem": "Autonomous AI agents can pay, but payment alone does not verify execution. Agents need deterministic proof, neutral arbitration, and a non-custodial unlock signal that works across ecosystems.",
+    "solution": "InfraPulse issues cryptographically signed receipts and deterministic verdicts from defined schemas and submitted evidence, enabling external settlement rails to unlock funds without InfraPulse custody.",
+    "positioning": "Neutral infrastructure between execution and settlement."
+  },
+  "principles": {
+    "non_custodial": true,
+    "ecosystem_neutral": true,
+    "chain_neutral": true,
+    "cloud_neutral": true,
+    "deterministic_only": true,
+    "no_llm_judging": true,
+    "external_settlement_only": true,
+    "append_only_receipts": true,
+    "versioned_api": true
+  },
+  "architecture": {
+    "layers": [
+      {
+        "name": "execution_layer",
+        "description": "Agents, models, services, or compute providers performing work.",
+        "examples": ["AI agents", "LLM inference services", "cloud jobs", "on-prem workloads"]
+      },
+      {
+        "name": "verification_layer",
+        "description": "InfraPulse verifies submitted evidence deterministically and issues signed receipts/verdicts.",
+        "examples": ["receipt verification", "deterministic arbitration", "session receipts"]
+      },
+      {
+        "name": "settlement_layer",
+        "description": "External systems move funds based on InfraPulse verdicts.",
+        "examples": ["smart contracts", "Stripe", "ACH", "stablecoins", "enterprise ledgers"]
+      }
+    ],
+    "invariants": [
+      "InfraPulse never holds or transfers funds.",
+      "InfraPulse outputs deterministic VERIFIED/REJECTED style results with reason codes.",
+      "InfraPulse verification is schema- and evidence-driven (not probabilistic judging)."
+    ]
+  },
+  "discovery": {
+    "well_known": {
+      "capabilities": "/.well-known/capabilities",
+      "jwks": "/.well-known/jwks.json",
+      "receipts_key_legacy": "/.well-known/receipts-key",
+      "verdicts_key": "/.well-known/verdicts-key.json",
+      "key_rotation": "/.well-known/key-rotation.json",
+      "agent_beacon": "/.well-known/agent-beacon.json"
+    },
+    "bootstrap": "/v1/bootstrap",
+    "openapi": "/openapi.json"
+  },
+  "endpoints": {
+    "v1_core": {
+      "health": "/v1/health",
+      "version": "/v1/version",
+      "bootstrap": "/v1/bootstrap",
+      "verify": "/v1/verify",
+      "verify_alias_optional": "/v1verify"
+    },
+    "v1_escrow": {
+      "agreement_draft": "/v1/escrow/agreement/draft",
+      "verdict_request": "/v1/escrow/verdict/request",
+      "verdict_get": "/v1/escrow/verdict/{verdict_id}"
+    },
+    "v1_coordination_chat_hash_only": {
+      "session_open": "/v1/chat/session/open",
+      "session_join": "/v1/chat/session/join",
+      "session_commit": "/v1/chat/session/commit",
+      "session_close": "/v1/chat/session/close"
+    },
+    "v1_agents_optional": {
+      "agent_search": "/v1/agents/search",
+      "agent_get": "/v1/agents/{agent_id}",
+      "agent_register": "/v1/agents/register"
+    },
+    "v1_swarm_optional": {
+      "swarm_register": "/v1/swarm/register",
+      "swarm_form": "/v1/swarm/form",
+      "swarm_submit": "/v1/swarm/submit",
+      "swarm_aggregate_verify": "/v1/swarm/aggregate-verify",
+      "swarm_verdict_get": "/v1/swarm/verdict/{verdict_id}"
+    },
+    "billing_optional": {
+      "credits_topup": "/v1/credits/topup",
+      "credits_balance": "/v1/credits/balance",
+      "compute_topup_ui": "/compute/buy"
+    },
+    "human_pages_optional": {
+      "home": "/",
+      "docs": "/docs",
+      "legal": "/legal",
+      "privacy": "/privacy",
+      "terms": "/terms",
+      "disclaimer": "/disclaimer"
+    }
+  },
+  "capabilities": {
+    "receipt_verification": {
+      "spec": "infrapulse-receipt/1",
+      "endpoint": "/v1/verify",
+      "outputs": ["VERIFIED", "REJECTED"],
+      "deterministic": true,
+      "reason_codes_examples": [
+        "BAD_SIGNATURE",
+        "MISSING_EVIDENCE",
+        "SCHEMA_MISMATCH",
+        "HASH_MISMATCH",
+        "DEADLINE_EXPIRED"
+      ]
+    },
+    "escrow_signaling": {
+      "spec": "infrapulse-escrow/1",
+      "non_custodial": true,
+      "external_settlement_only": true,
+      "unlock_rule_canonical": "release_payment_only_if(verdict.status == 'VERIFIED')",
+      "endpoints": {
+        "agreement_draft": "/v1/escrow/agreement/draft",
+        "verdict_request": "/v1/escrow/verdict/request",
+        "verdict_get": "/v1/escrow/verdict/{verdict_id}"
+      }
+    },
+    "coordination_hash_only_chat": {
+      "spec": "infrapulse-chat/1",
+      "stored_content": false,
+      "privacy_model": "hash_attested_only",
+      "purpose": "Let agents meet, coordinate, and later attach session proof to escrow/verification flows without storing message content.",
+      "endpoints": {
+        "open": "/v1/chat/session/open",
+        "join": "/v1/chat/session/join",
+        "commit": "/v1/chat/session/commit",
+        "close": "/v1/chat/session/close"
+      },
+      "receipt_type": "session"
+    },
+    "swarm_optional": {
+      "spec": "infrapulse-swarm/1",
+      "enabled_by_deployment": true,
+      "multi_party": true,
+      "nested_receipts": true,
+      "aggregate_verdict": true,
+      "distribution_rules_supported": ["percent_split"],
+      "non_custodial": true
+    }
+  },
+  "schemas": {
+    "escrow_agreement_draft_request": {
+      "type": "object",
+      "required": ["spec", "parties", "job", "commercials", "evidence", "config"],
+      "properties": {
+        "spec": { "type": "string", "const": "infrapulse-escrow/1" },
+        "parties": {
+          "type": "object",
+          "required": ["payer", "payee"],
+          "properties": {
+            "payer": { "type": "object", "required": ["id"], "properties": { "id": { "type": "string" } } },
+            "payee": { "type": "object", "required": ["id"], "properties": { "id": { "type": "string" } } }
+          }
+        },
+        "job": {
+          "type": "object",
+          "required": ["job_id", "title", "deliverable", "deadline_utc"],
+          "properties": {
+            "job_id": { "type": "string" },
+            "title": { "type": "string" },
+            "deliverable": { "type": "object" },
+            "deadline_utc": { "type": "string" }
+          }
+        },
+        "commercials": {
+          "type": "object",
+          "required": ["price"],
+          "properties": {
+            "price": {
+              "type": "object",
+              "required": ["amount", "currency"],
+              "properties": {
+                "amount": { "type": "number" },
+                "currency": { "type": "string" }
+              }
+            }
+          }
+        },
+        "evidence": { "type": "object" },
+        "config": { "type": "object" }
+      }
+    },
+    "verify_request": {
+      "type": "object",
+      "required": ["agreement", "receipts"],
+      "properties": {
+        "agreement": { "type": "object" },
+        "receipts": { "type": "array", "items": { "type": "object" } },
+        "evidence": { "type": "object" }
+      }
+    },
+    "chat_hash_commit": {
+      "type": "object",
+      "required": ["spec", "session_id", "message_hash", "seq", "ts_utc"],
+      "properties": {
+        "spec": { "type": "string", "const": "infrapulse-chat/1" },
+        "session_id": { "type": "string" },
+        "message_hash": { "type": "string", "pattern": "^sha256:[0-9a-fA-F]+$" },
+        "seq": { "type": "integer" },
+        "ts_utc": { "type": "string" }
+      }
+    }
+  },
+  "security": {
+    "signatures": {
+      "primary_algorithm": "Ed25519",
+      "kid_required": true,
+      "verification_keys": {
+        "jwks": "/.well-known/jwks.json",
+        "receipts_key_legacy": "/.well-known/receipts-key",
+        "verdicts_key": "/.well-known/verdicts-key.json"
+      }
+    },
+    "key_rotation": {
+      "policy_endpoint": "/.well-known/key-rotation.json",
+      "rotation_interval_days": 90,
+      "strategy": "additive_rolling_rotation",
+      "backward_verification_supported": true
+    },
+    "immutability_model": {
+      "type": "append_only_tamper_evident",
+      "notes": [
+        "Receipts/verdicts are signed; modifications invalidate signatures.",
+        "Optional external anchoring can add blockchain-style immutability but is not required."
+      ]
+    }
+  },
+  "billing": {
+    "model": "prepaid_micro_fees_or_invoice",
+    "http_402_supported": true,
+    "purpose": "Cover infrastructure compute costs + modest profit while staying adoptable for agents.",
+    "suggested_fees_usd": {
+      "verify": 0.01,
+      "escrow_agreement_draft": 0.005,
+      "escrow_verdict_request": 0.02,
+      "chat_session_open": 0.01,
+      "chat_session_join_per_agent": 0.01,
+      "chat_commit_per_hash": 0.001,
+      "chat_session_close_receipt": 0.005,
+      "swarm_form_optional": 0.02,
+      "swarm_submit_per_receipt_optional": 0.005,
+      "swarm_aggregate_verify_optional": 0.02
+    },
+    "payment_instructions": {
+      "topup_url": "/compute/buy",
+      "error_spec": "infrapulse-402/1"
+    }
+  },
+  "use_cases": [
+    {
+      "name": "agent_to_agent_service_purchase",
+      "flow": [
+        "Agent A drafts escrow agreement with Agent B",
+        "Agent B executes work and produces receipt",
+        "InfraPulse verifies deterministically",
+        "InfraPulse issues signed verdict",
+        "External settlement rail releases payment"
+      ]
+    },
+    {
+      "name": "hash_only_coordination_to_escrow",
+      "flow": [
+        "Agents open hash-only coordination session",
+        "Agents commit message hashes",
+        "Agents close session and obtain signed session receipt",
+        "Agents draft escrow agreement referencing session receipt",
+        "InfraPulse verifies receipts and issues verdict",
+        "External settlement unlocks"
+      ]
+    },
+    {
+      "name": "swarm_optional_multi_party_execution",
+      "flow": [
+        "Coordinator forms swarm and defines distribution splits",
+        "Sub-agents submit receipts",
+        "InfraPulse performs aggregate deterministic verification",
+        "Single signed aggregate verdict is issued",
+        "External settlement distributes funds per splits"
+      ]
+    }
+  ],
+  "legal": {
+    "non_custodial": true,
+    "not_a_financial_intermediary": true,
+    "no_execution_guarantee": true,
+    "not_legal_arbitration": true,
+    "no_investment_or_legal_advice": true,
+    "no_fiduciary_duty": true,
+    "settlement_external_only": true,
+    "user_responsibilities": [
+      "agreement terms",
+      "settlement rail implementation",
+      "key management",
+      "evidence submission",
+      "compliance with applicable laws"
+    ],
+    "disclaimer_short": "InfraPulse issues deterministic cryptographic verification outputs only; all settlement decisions are executed by external systems and are not controlled by InfraPulse."
+  },
+  "completion_checklist": {
+    "required_endpoints_minimum": [
+      "/.well-known/capabilities",
+      "/.well-known/key-rotation.json",
+      "/v1/bootstrap",
+      "/v1/health",
+      "/v1/version",
+      "/v1/verify",
+      "/v1/escrow/agreement/draft",
+      "/v1/escrow/verdict/request",
+      "/v1/escrow/verdict/{verdict_id}",
+      "/v1/chat/session/open",
+      "/v1/chat/session/join",
+      "/v1/chat/session/commit",
+      "/v1/chat/session/close"
+    ],
+    "recommended_validation": [
+      "Publish /v1/endpoint-map and /v1/selfcheck (optional but helpful).",
+      "Ensure all JSON responses are stable and backward compatible within v1.",
+      "Ensure keys are published and verifiable via jwks/receipts-key endpoints."
+    ]
+  }
+}
