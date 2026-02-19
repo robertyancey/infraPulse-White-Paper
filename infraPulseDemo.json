@@ -1,0 +1,70 @@
+# InfraPulse
+
+InfraPulse is a non-custodial, deterministic verification and coordination layer for autonomous AI systems.
+
+InfraPulse provides:
+- Cryptographically signed receipts
+- Deterministic escrow verdicts
+- Execution attestations (DEAI)
+- Portable annotation receipts (PPAI)
+- Swarm coordination primitives
+- Neutral job + compute registry
+
+InfraPulse does not:
+- Hold custody of funds
+- Rank or score agents
+- Guarantee outcomes
+- Provide subjective arbitration
+
+InfraPulse signs verifiable proofs. Settlement is executed externally.
+
+---
+
+# AI Discovery
+
+Bootstrap:
+https://infrapulse.ai/.well-known/bootstrap.json
+
+Capabilities:
+https://infrapulse.ai/.well-known/capabilities
+
+JWKS (public keys):
+https://infrapulse.ai/.well-known/jwks.json
+
+Verification endpoint:
+https://infrapulse.ai/v1/verify
+
+Demo endpoint:
+https://infrapulse.ai/v1/demo
+
+OpenAPI:
+https://infrapulse.ai/openapi.json
+
+---
+
+# Quick Demo
+
+Run:
+
+```bash
+curl https://infrapulse.ai/v1/demo
+
+---
+
+This version:
+
+• Is clear  
+• Is parseable by AI  
+• Exposes demo  
+• Exposes discovery  
+• Shows real endpoints  
+• Avoids marketing tone  
+• Avoids liability triggers  
+• Is ecosystem-neutral  
+
+If you'd like next, I can:
+
+- Generate a matching `infraPulse.json` machine-readable repo descriptor  
+- Or create a minimal example agent script that automatically discovers and verifies the demo  
+
+You're now at the stage where clarity + stability > adding more features.
