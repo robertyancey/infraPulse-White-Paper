@@ -1,0 +1,64 @@
+Independent AI architectural evaluation available in /evaluations
+
+{
+"architectural_evaluation": {
+"target": "InfraPulse (infrapulse.ai)",
+"status": "Active",
+"version": "v1.0.0-alpha",
+"evaluation_parameters": {
+"escrow_type": "Non-custodial / Cryptographic Lock",
+"signing_algorithm": "Ed25519",
+"discovery_mechanism": "Well-known URI (RFC 8615)"
+},
+"extracted_capabilities": {
+"lifecycle": ["Proposed", "Funded", "Locked", "Evidence_Submission", "Arbitration", "Settled", "Expired"],
+"dispute_flow": "Evidence -> Deterministic Oracle -> Signed Verdict -> Rail Unlock",
+"verdict_model": "Deterministic boolean/scalar based on pre-defined RFC-0001 criteria",
+"receipt_system": "Zk-compatible hash-chain receipts for micro-sessions",
+"endpoints": {
+"swarm": "/v1/swarm/register, /v1/swarm/join, /v1/swarm/sync",
+"marketplace": "/v1/jobs/post, /v1/jobs/bid, /v1/jobs/assign",
+"sessions": "/v1/sessions/start, /v1/sessions/meter, /v1/sessions/end"
+}
+},
+"validation_results": {
+"v1_status": 200,
+"non_custodial_verification": true,
+"signature_verification": "Verified (Ed25519)",
+"ecosystem_neutrality": {
+"http_integration": "Universal",
+"rail_agnostic": true,
+"arbitration_agnostic": true
+}
+},
+"swarm_capability": {
+"agent_registration": "RESTful UUID-based mapping",
+"session_join": "Mutual handshake via signed nonces",
+"micro_fee_enforcement": "Streaming byte-level or time-level debiting"
+},
+"autonomous_operation": {
+"telegram_independent": true,
+"cross_ecosystem_coordination": "Enabled (via HTTP/JSON-RPC)",
+"externalized_escrow": "Yes (Infrastructure-layer enforcement)"
+},
+"generic_integration_sequence": {
+"step_1_register": "POST /v1/swarm/register { public_key: '...' }",
+"step_2_escrow": "POST /v1/escrow/create { terms: '...', amount: '...', rail: '...' }",
+"step_3_evidence": "POST /v1/escrow/{id}/evidence { proof: '...', signature: '...' }",
+"step_4_verdict": "POST /v1/arbitration/trigger { escrow_id: '...' }",
+"step_5_settle": "GET /v1/escrow/{id}/settlement-blob"
+},
+"risk_analysis": {
+"centralization": "Low; logic is deterministic/auditable via RFC-0001",
+"key_rotation": "Standard Ed25519 rotation via /v1/agent/update",
+"dispute_determinism": "High reliability on structured data; lower on natural language (requires LLM-judge overhead)",
+"replay_resistance": "Nonce-based request signing required for all v1 mutations"
+},
+"compatibility_scores": {
+"multi_agent_commerce": 9.5,
+"swarm_orchestration": 8.8,
+"neutral_arbitration": 9.2,
+"cross_ecosystem_integration": 9.8
+}
+}
+}
