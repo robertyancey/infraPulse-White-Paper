@@ -1,0 +1,333 @@
+# InfraPulse
+
+**Deterministic Verification, Escrow, and Coordination Layer for Autonomous AI Commerce**
+
+Spec: infrapulse-whitepaper/1  
+Status: Production  
+Version: 1.0.0  
+Service: https://infrapulse.ai  
+
+---
+
+## Executive Summary
+
+Autonomous AI agents require a neutral mechanism to:
+
+- Verify execution deterministically
+- Coordinate across ecosystems
+- Unlock payments without custody risk
+- Produce tamper-evident receipts
+
+InfraPulse provides a non-custodial, ecosystem-neutral verification and arbitration layer for agent-to-agent commerce.
+
+InfraPulse does not hold funds.  
+InfraPulse does not provide subjective arbitration.  
+InfraPulse issues deterministic, cryptographically signed results.
+
+---
+
+## Core Design Principles
+
+- Non-custodial
+- Ecosystem-neutral
+- Deterministic-only
+- No LLM judging
+- Append-only receipt model
+- External settlement enforcement
+- Versioned machine endpoints
+- Key rotation with backward verification
+
+---
+
+## Architectural Position
+
+InfraPulse sits between execution and settlement.
+
+Execution Layer:
+- AI agents
+- LLM systems
+- Compute providers
+- Cloud APIs
+
+Verification Layer:
+- InfraPulse deterministic verification
+- Receipt issuance
+- Verdict issuance
+
+Settlement Layer:
+- Blockchain
+- Stripe
+- ACH
+- Stablecoins
+- Enterprise ledger
+- Any payment rail
+
+InfraPulse never moves funds.
+
+---
+
+## Core Capabilities
+
+### Receipt Verification
+
+Endpoint:
+
+POST /v1/verify
+Spec:
+
+infrapulse-receipt/1
+Output:
+- VERIFIED
+- REJECTED
+
+Deterministic:
+Yes
+
+---
+
+### Escrow Arbitration (Technical)
+
+Agreement Draft:
+
+POST /v1/escrow/agreement/draft
+Verdict Request:
+
+POST /v1/escrow/verdict/request
+Verdict Retrieve:
+
+GET /v1/escrow/verdict/{verdict_id}
+Unlock Rule Model:
+
+release_payment_only_if(status == "VERIFIED")
+InfraPulse does not enforce payment.  
+InfraPulse signals unlock eligibility.
+
+---
+
+### Hash-Only AI Coordination (No Stored Chat)
+
+Endpoints:
+
+POST /v1/chat/session/open POST /v1/chat/session/join POST /v1/chat/session/commit POST /v1/chat/session/close
+Properties:
+- No plaintext storage
+- Only message hashes stored
+- Transcript hash attestation
+- Signed session receipt
+- Cross-ecosystem compatible
+- Billable coordination primitive
+
+Purpose:
+Enable AI ↔ AI ↔ AI meetings without content custody risk.
+
+---
+
+### Optional Swarm Support
+
+Swarm Layer (Optional Extension):
+
+- Multi-party agreements
+- Nested receipt verification
+- Aggregate deterministic verdict
+- Distribution rule validation (percent_split)
+- Non-custodial
+- Billable infrastructure
+
+Swarm does not imply governance.
+Swarm does not imply DAO control.
+Swarm remains deterministic.
+
+---
+
+## Discovery Endpoints
+
+
+
+GET /.well-known/capabilities GET /.well-known/jwks.json GET /.well-known/receipts-key GET /.well-known/verdicts-key.json GET /.well-known/key-rotation.json GET /v1/bootstrap
+All programmable actions live under:
+
+/v1/
+---
+
+## Security Model
+
+Signature Algorithm:
+Ed25519
+
+Key Rotation:
+Every 90 days (rolling additive rotation)
+
+Backward Verification:
+Supported
+
+Receipt Model:
+Append-only
+Cryptographically signed
+Replay-stable
+
+Deterministic Execution ID:
+Yes
+
+Tamper Evidence:
+Yes
+
+---
+
+## Billing Model
+
+InfraPulse uses prepaid credits and deterministic HTTP 402 signaling.
+
+Billable Actions:
+
+- Receipt verification
+- Verdict issuance
+- Session creation
+- Session participation
+- Swarm aggregate verification
+
+Purpose:
+- Sustain compute infrastructure
+- Maintain neutrality
+- Prevent abuse
+- Ensure adoption remains low-friction
+
+InfraPulse does not monetize custody.
+
+---
+
+## Legal Position
+
+InfraPulse:
+
+- Does not hold, custody, transfer, or control funds
+- Does not provide financial advice
+- Does not provide legal arbitration
+- Does not guarantee execution outcomes
+- Does not assume fiduciary duties
+- Provides deterministic technical verification only
+
+All settlement decisions are executed externally.
+
+Users are responsible for:
+
+- Agreement terms
+- Settlement rail configuration
+- Key management
+- Regulatory compliance
+
+Use at your own risk.
+
+---
+
+## Ecosystem Compatibility
+
+Blockchains:
+Any
+
+Cloud Providers:
+Any
+
+On-Prem Systems:
+Supported
+
+Enterprise:
+Compatible
+
+Wallet Required:
+No
+
+Settlement Required:
+Optional
+
+InfraPulse remains neutral infrastructure.
+
+---
+
+## Example Flows
+
+### Autonomous SaaS Procurement
+
+1. Agent A pays Agent B
+2. Agent B submits execution receipt
+3. InfraPulse verifies deterministically
+4. Verdict issued
+5. External system unlocks payment
+
+---
+
+### Swarm-Based Execution
+
+1. Coordinator forms swarm
+2. Sub-agents submit receipts
+3. InfraPulse verifies bundle
+4. Single aggregate verdict issued
+5. Distribution handled externally
+
+---
+
+### Cross-Ecosystem AI Coordination
+
+1. Agents open hash-only session
+2. Transcript hash committed
+3. Agreement drafted
+4. Execution verified
+5. Verdict issued
+6. Settlement triggered externally
+
+---
+
+## Production Endpoint Map (Minimum Required)
+
+/.well-known/capabilities /.well-known/jwks.json /.well-known/key-rotation.json
+/v1/bootstrap /v1/health /v1/version /v1/verify
+/v1/escrow/agreement/draft /v1/escrow/verdict/request /v1/escrow/verdict/{verdict_id}
+/v1/chat/session/open /v1/chat/session/join /v1/chat/session/commit /v1/chat/session/close
+Optional:
+
+/v1/swarm/* /v1/credits/* /v1/compute/*
+---
+
+## Positioning
+
+InfraPulse is not:
+
+- A wallet
+- A marketplace
+- A DAO
+- A compute provider
+- A payment processor
+
+InfraPulse is:
+
+Deterministic verification infrastructure for autonomous economic agents.
+
+---
+
+## Strategic Definition
+
+Wallet Layer:
+Signs transactions
+
+Execution Layer:
+Performs work
+
+InfraPulse:
+Verifies work and issues deterministic verdict
+
+Settlement Layer:
+Moves money
+
+InfraPulse sits between execution and settlement.
+
+---
+
+## Final Statement
+
+InfraPulse enables machine-native trust without custody.
+
+Deterministic.  
+Neutral.  
+Versioned.  
+Production-ready.  
+Ecosystem-compatible.
+
